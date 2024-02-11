@@ -1,0 +1,38 @@
+---
+title: "IoT Ingest"
+author: "Rakha Hafish Setiawan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r Load Library and Connect}
+library(tidyverse)
+library(sparklyr)
+```
+
+```{r Ingest}
+sc <- spark_connect(master = "local")
+HumidData <- spark_read_csv(sc, name = "HumidData", path = "Sensors-Kelembaban.csv")
+TempData <- spark_read_csv(sc, name = "TempData", path = "Sensors-Temperatur.csv")
+```
+
+```{r}
+HumidData %>% head(3)
+```
+```{r}
+TempData %>% head(3)
+```
+
+```{r Transform and Load}
+#Humidity
+HumidTransformed <- HumidData %>% 
+  separate(time, c("date", "time"), " ") %>% 
+  select(date, time, value) %>% 
+  write.csv("HumidData.csv")
+#Temperature
+TempTransformed <- TempData %>% 
+  separate(time, c("date", "time"), " ") %>% 
+  select(date, time, value) %>% 
+  write.csv("TempData.csv")
+```
+
